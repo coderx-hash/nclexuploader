@@ -1,1 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NURSIFY COMMAND CENTER</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.8);
+            --cyan: #06b6d4;
+            --purple: #8b5cf6;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
 
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 20%);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin: 0;
+            background: linear-gradient(to right, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .status-pill {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); }
+
+        /* PANELS */
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .panel h3 { margin-top: 0; font-size: 18px; color: var(--cyan); display: flex; align-items: center; gap: 8px; text-transform: uppercase; }
+
+        /* INPUT AREA */
+        textarea {
+            width: 100%;
+            height: 250px;
+            background: rgba(15, 23, 42, 0.8);
+            color: var(--text-main);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+        textarea:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+
+        /* BUTTONS */
+        .btn-group { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #475569;
+            color: var(--text-main);
+            padding: 12px 24px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: linear-gradient(45deg, var(--cyan), #3b82f6); border: none; color: black; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
+        .btn-primary:disabled { background: #334155; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-secondary { border-color: var(--purple); color: var(--purple); }
+        .btn-secondary:hover { background: rgba(139, 92, 246, 0.1); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+
+        .btn-danger { border-color: var(--red); color: var(--red); width: 100%; justify-content: center; }
+        .btn-danger:hover { background: var(--red); color: white; box-shadow: 0 0 20px var(--red); }
+
+        /* LOGS */
+        .log-container {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: #000;
+            border-radius: 8px;
+            padding: 15px;
+            height: 120px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            color: #666;
+        }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid #111; padding-bottom: 2px; }
+        .log-success { color: var(--green); }
+        .log-error { color: var(--red); }
+        .log-info { color: var(--cyan); }
+        .log-warn { color: var(--yellow); }
+
+        /* TABLE & PREVIEW */
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 14px; }
+        th { text-align: left; padding: 10px; color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { background: rgba(255, 255, 255, 0.03); padding: 15px; vertical-align: middle; border-top: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 1px solid rgba(255, 255, 255, 0.05); }
+        td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid; display: inline-block; min-width: 40px; text-align: center; }
+        /* NCLEX COLORS */
+        .safe { border-color: #22d3ee; color: #22d3ee; background: rgba(34, 211, 238, 0.1); }
+        .promo { border-color: #34d399; color: #34d399; background: rgba(52, 211, 153, 0.1); }
+        .psych { border-color: #a855f7; color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+        .physio { border-color: #f472b6; color: #f472b6; background: rgba(244, 114, 182, 0.1); }
+        .pharm { border-color: #fbbf24; color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+
+        .preview-card { 
+            background: rgba(0,0,0,0.3); 
+            border-left: 3px solid var(--cyan); 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview-card.error { border-left-color: var(--red); background: rgba(239, 68, 68, 0.05); }
+        
+        /* NEW: SEARCH, FILTER & STATS STYLES */
+        .search-bar {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+        }
+        .search-bar:focus { outline: none; border-color: var(--cyan); }
+
+        .filter-select {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        .filter-select:focus { outline: none; border-color: var(--cyan); }
+
+        /* GRID SYSTEM FOR STATS TO PREVENT OVERLAP */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Auto adjust width */
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); border-color: var(--cyan); }
+        
+        .stat-value { font-size: 28px; font-weight: 700; color: white; line-height: 1; margin-bottom: 5px; }
+        .stat-label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
+        
+        /* Specific Colors for Stats */
+        .st-total { border-top: 3px solid #fff; }
+        .st-safe { border-top: 3px solid #22d3ee; }
+        .st-promo { border-top: 3px solid #34d399; }
+        .st-psych { border-top: 3px solid #a855f7; }
+        .st-physio { border-top: 3px solid #f472b6; }
+        .st-pharm { border-top: 3px solid #fbbf24; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="header">
+        <div>
+            <h1><i class='bx bxs-capsule'></i> NURSIFY COMMAND CENTER</h1>
+            <div style="color: var(--text-muted); font-size: 14px; letter-spacing: 1px;">NCLEX DATABASE MANAGER (ELITE MODE)</div>
+        </div>
+        <div class="status-pill">
+            <div class="status-dot"></div>
+            DATABASE CONNECTED
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3><i class='bx bx-terminal'></i> System Terminal</h3>
+        <div class="log-container" id="sysLog">
+            <div class="log-entry log-info">> Initializing Nursify Admin...</div>
+            <div class="log-entry">> Cloud Connection: ESTABLISHED</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3><i class='bx bx-code-block'></i> Smart Data Ingestion</h3>
+        <textarea id="rawInput" placeholder="Paste your NCLEX questions here (Batch Paste Supported)...
+
+Format Example:
+1. A nurse is assessing a client... (Question)
+A. Option One
+B. Option Two
+C. Option Three
+D. Option Four
+Answer: B
+Rationale: This is the reason...
+Category: Pharm (Optional, Auto-detect enabled)"></textarea>
+
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="processInput()"><i class='bx bx-scan'></i> Scan & Verify</button>
+            <button class="btn-primary" onclick="uploadData()" id="btnUpload" disabled><i class='bx bx-cloud-upload'></i> Upload to Database</button>
+            <button class="btn-secondary" onclick="clearInput()"><i class='bx bx-trash'></i> Clear</button>
+            <button class="btn-secondary" onclick="fetchLive()" style="margin-left:auto"><i class='bx bx-data'></i> View Live Data</button>
+        </div>
+    </div>
+
+    <div id="previewArea" class="panel" style="display:none;">
+        <h3><i class='bx bx-list-check'></i> Scan Results</h3>
+        <div id="previewContent"></div>
+    </div>
+
+    <div id="liveDataArea" class="panel" style="display:none;">
+        <h3><i class='bx bx-server'></i> Live Database Overview</h3>
+        
+        <div class="stats-grid">
+            <div class="stat-card st-total"><div class="stat-value" id="c-total">0</div><div class="stat-label">TOTAL</div></div>
+            <div class="stat-card st-safe"><div class="stat-value" id="c-safe">0</div><div class="stat-label">SAFE CARE</div></div>
+            <div class="stat-card st-promo"><div class="stat-value" id="c-promo">0</div><div class="stat-label">HEALTH PROMO</div></div>
+            <div class="stat-card st-psych"><div class="stat-value" id="c-psych">0</div><div class="stat-label">PSYCHOSOCIAL</div></div>
+            <div class="stat-card st-physio"><div class="stat-value" id="c-physio">0</div><div class="stat-label">PHYSIOLOGICAL</div></div>
+            <div class="stat-card st-pharm"><div class="stat-value" id="c-pharm">0</div><div class="stat-label">PHARMACOLOGY</div></div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search questions..." onkeyup="window.filterData()">
+            <select id="filterCategory" class="filter-select" onchange="window.filterData()">
+                <option value="ALL">All Categories</option>
+                <option value="Safe Care">Safe Care</option>
+                <option value="Health Promo">Health Promo</option>
+                <option value="Psychosocial">Psychosocial</option>
+                <option value="Physiological">Physiological</option>
+                <option value="Pharm">Pharmacology</option>
+            </select>
+        </div>
+
+        <div id="liveContent"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, deleteDoc, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // --- YOUR NURSIFY CONFIG (REPLACED) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBnNERL2mKSmPPePf1CHe6aIx7KwhQ-cEc",
+        authDomain: "nlcexreviewer.firebaseapp.com",
+        projectId: "nlcexreviewer",
+        storageBucket: "nlcexreviewer.firebasestorage.app",
+        messagingSenderId: "707153074336",
+        appId: "1:707153074336:web:1cfc48a8cc4ec6679cd1c5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    let parsedPayload = [];
+    let globalQuestions = []; 
+
+    // --- LOGGING ---
+    function log(msg, type = 'info') {
+        const consoleEl = document.getElementById('sysLog');
+        const line = document.createElement('div');
+        line.className = 'log-entry';
+        const ts = new Date().toLocaleTimeString('en-US', {hour12:false});
+        if(type === 'success') line.classList.add('log-success');
+        if(type === 'error') line.classList.add('log-error');
+        if(type === 'warn') line.classList.add('log-warn');
+        if(type === 'info') line.classList.add('log-info');
+        line.innerText = `[${ts}] > ${msg}`;
+        consoleEl.appendChild(line);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    // --- CATEGORY DETECTION (ADAPTED FOR NCLEX) ---
+    function detectCat(text) {
+        const t = text.toLowerCase();
+        // Explicit override
+        const explicit = text.match(/(?:Category|Topic)\s*[:\-]\s*(Safe Care|Health Promo|Psychosocial|Physiological|Pharm)/i);
+        if (explicit) return explicit[1]; // Return found category verbatim
+
+        // Smart Detection
+        if (t.match(/drug|medication|dose|administer|insulin|digoxin|toxicity|side effect/)) return "Pharm";
+        if (t.match(/psych|mental|depression|anxiety|communication|therapeutic|grief|coping/)) return "Psychosocial";
+        if (t.match(/teaching|education|prevention|vaccine|screening|development|diet/)) return "Health Promo";
+        if (t.match(/safety|priority|triage|delegate|sterile|infection control|legal|ethics/)) return "Safe Care";
+        
+        return "Physiological"; // Default to biggest category
+    }
+
+    // --- CLASS HELPER ---
+    function getCatClass(cat) {
+        if(cat === "Safe Care") return "safe";
+        if(cat === "Health Promo") return "promo";
+        if(cat === "Psychosocial") return "psych";
+        if(cat === "Pharm") return "pharm";
+        return "physio";
+    }
+
+    // --- PARSING ---
+    window.processInput = () => {
+        const raw = document.getElementById('rawInput').value;
+        if(!raw.trim()) { log("Input buffer is empty.", "error"); return; }
+        
+        log("Scanning text block...");
+        const blocks = raw.split(/\n\s*\n|---/).filter(b => b.trim().length > 10);
+        
+        parsedPayload = blocks.map(block => {
+            const lines = block.split('\n').map(l => l.trim()).filter(l=>l);
+            
+            // CLEAN QUESTION
+            let qText = lines[0].replace(/^\d+[\.\)\-]\s*/, "").trim();                        
+
+            let choices = {A:"", B:"", C:"", D:""};
+            let ansKey = "";
+            let rat = "";
+
+            lines.forEach(l => {
+                const clean = l.replace(/[\u200B-\u200D\uFEFF]/g, ''); 
+                if(clean.match(/^(?:Ans|Answer)/i)) { ansKey = clean.split(/[:\-\.]/)[1]?.trim().toUpperCase().charAt(0); }
+                else if(clean.match(/^(?:Rat|Rationale)/i)) { rat = clean.split(/[:\-\.]/)[1]?.trim(); }
+                else if(clean.match(/^[A-D][\.\)\-]/)) {
+                    let letter = clean.charAt(0).toUpperCase();
+                    choices[letter] = clean.substring(2).trim();
+                }
+            });
+
+            // Convert Letter Answer to Index (0-3)
+            let correctIdx = -1;
+            if(ansKey === 'A') correctIdx = 0;
+            if(ansKey === 'B') correctIdx = 1;
+            if(ansKey === 'C') correctIdx = 2;
+            if(ansKey === 'D') correctIdx = 3;
+
+            // Validation
+            let missing = [];
+            if(!qText) missing.push("Question");
+            if(!choices.A) missing.push("Option A");
+            if(correctIdx === -1) missing.push("Answer Key");
+            
+            return {
+                question: qText,
+                options: [choices.A, choices.B, choices.C, choices.D],
+                correctIndex: correctIdx, // SAVING AS INDEX FOR APP COMPATIBILITY
+                correctLetter: ansKey, // Just for display in admin
+                rationale: rat,
+                category: detectCat(block),
+                valid: missing.length === 0,
+                missing: missing
+            };
+        });
+
+        renderPreview();
+    };
+
+    function renderPreview() {
+        const container = document.getElementById('previewContent');
+        const area = document.getElementById('previewArea');
+        const uploadBtn = document.getElementById('btnUpload');
+        
+        area.style.display = 'block';
+        document.getElementById('liveDataArea').style.display = 'none';
+        container.innerHTML = "";
+        
+        let validCount = 0;
+
+        parsedPayload.forEach((item) => {
+            if(item.valid) validCount++;
+            const div = document.createElement('div');
+            div.className = `preview-card ${item.valid ? '' : 'error'}`;
+            div.innerHTML = `
+                <div style="flex:1">
+                    <div style="font-size: 15px; font-weight: 600; color: var(--text-main)">${item.question.substring(0,100)}...</div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 5px;">
+                        Answer: <span style="color: var(--cyan)">${item.correctLetter}</span> | Index: ${item.correctIndex}
+                    </div>
+                    ${!item.valid ? `<div style="color: var(--red); font-size: 12px; margin-top:5px;">MISSING: ${item.missing.join(', ')}</div>` : ''}
+                </div>
+                <div style="text-align: right;">
+                    <span class="badge ${getCatClass(item.category)}">${item.category}</span>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        if(validCount > 0) {
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = `<i class='bx bx-cloud-upload'></i> Upload (${validCount}) Items`;
+            log(`Scan complete. Found ${validCount} valid questions.`, "success");
+        } else {
+            uploadBtn.disabled = true;
+            log("Scan failed. No valid data found.", "error");
+        }
+    }
+
+    // --- UPLOAD TO 'nclex_questions' ---
+    window.uploadData = async () => {
+        const btn = document.getElementById('btnUpload');
+        const validItems = parsedPayload.filter(i => i.valid);
+        
+        btn.disabled = true;
+        btn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Uploading...`;
+        log("Checking for duplicates...", "info");
+
+        let success = 0;
+        let fail = 0;
+
+        for(const item of validItems) {
+            try {
+                // Check duplicate in 'nclex_questions'
+                const q = query(collection(db, "nclex_questions"), where("question", "==", item.question));
+                const snap = await getDocs(q);
+
+                if (!snap.empty) {
+                    log(`Duplicate skipped: "${item.question.substring(0,20)}..."`, "warn");
+                    continue; 
+                }
+
+                await addDoc(collection(db, "nclex_questions"), {
+                    question: item.question,
+                    options: item.options,
+                    correctIndex: item.correctIndex, // Number 0-3
+                    rationale: item.rationale,
+                    category: item.category,
+                    timestamp: Date.now()
+                });
+                success++;
+                await new Promise(r => setTimeout(r, 100)); 
+
+            } catch(e) {
+                fail++;
+                console.error(e);
+                log("Error: " + e.message, "error");
+            }
+        }
+
+        log(`Uploaded: ${success} | Skipped/Error: ${fail}`, success > 0 ? "success" : "warn");
+        btn.innerHTML = `<i class='bx bx-check'></i> Complete`;
+        setTimeout(() => { btn.innerHTML = `<i class='bx bx-cloud-upload'></i> Upload to Database`; }, 3000);
+        window.fetchLive();
+    };
+
+    // --- FETCH LIVE ---
+    window.fetchLive = async () => {
+        document.getElementById('previewArea').style.display = 'none';
+        const area = document.getElementById('liveDataArea');
+        const cont = document.getElementById('liveContent');
+        
+        area.style.display = 'block';
+        cont.innerHTML = `<div style="padding:20px; text-align:center; color: var(--cyan)"><i class='bx bx-loader-alt bx-spin'></i> Syncing...</div>`;
+        log("Fetching nclex_questions...", "info");
+
+        try {
+            const q = query(collection(db, "nclex_questions"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            
+            globalQuestions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            updateStats(globalQuestions);
+            log(`Loaded ${globalQuestions.length} records.`, "success");
+            window.filterData();
+
+        } catch(e) {
+            cont.innerHTML = `<div style="color:var(--red); text-align:center;">Error: ${e.message}</div>`;
+            log("Error fetching: " + e.message, "error");
+        }
+    };
+
+    // --- STATS ---
+    function updateStats(data) {
+        const counts = { TOTAL: data.length, "Safe Care": 0, "Health Promo": 0, "Psychosocial": 0, "Physiological": 0, "Pharm": 0 };
+
+        data.forEach(item => {
+            let cat = item.category || "Physiological";
+            if (counts[cat] !== undefined) counts[cat]++;
+            else counts["Physiological"]++; 
+        });
+
+        document.getElementById('c-total').innerText = counts.TOTAL;
+        document.getElementById('c-safe').innerText = counts["Safe Care"];
+        document.getElementById('c-promo').innerText = counts["Health Promo"];
+        document.getElementById('c-psych').innerText = counts["Psychosocial"];
+        document.getElementById('c-physio').innerText = counts["Physiological"];
+        document.getElementById('c-pharm').innerText = counts["Pharm"];
+    }
+
+    // --- FILTER ---
+    window.filterData = () => {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const catFilter = document.getElementById('filterCategory').value;
+        const cont = document.getElementById('liveContent');
+
+        const filtered = globalQuestions.filter(item => {
+            const matchesSearch = item.question.toLowerCase().includes(term);
+            const matchesCategory = catFilter === "ALL" || item.category === catFilter;
+            return matchesSearch && matchesCategory;
+        });
+
+        let html = ``;
+        if(filtered.length === 0) {
+            html += `<div style="padding:40px; text-align:center; color: var(--text-muted);">No data found.</div>`;
+        } else {
+            html += `
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Displaying ${filtered.length} results</div>
+            <table><tr><th>Category</th><th>Question</th><th>Ans Index</th><th>Action</th></tr>`;
+            filtered.forEach(data => {
+                html += `
+                    <tr>
+                        <td><span class="badge ${getCatClass(data.category)}">${data.category}</span></td>
+                        <td>
+                            <div style="font-weight:600; color:white;">${data.question.substring(0, 80)}...</div>
+                            <div style="font-size:12px; color:var(--text-muted)">${data.rationale ? "Has Rationale" : "No Rationale"}</div>
+                        </td>
+                        <td style="color:var(--cyan); font-weight:bold;">${data.correctIndex}</td>
+                        <td><button style="padding:5px 10px; font-size:12px; border-color:var(--red); color:var(--red); background:transparent;" onclick="window.delOne('${data.id}')">DEL</button></td>
+                    </tr>
+                `;
+            });
+            html += "</table>";
+        }
+        cont.innerHTML = html;
+    };
+
+    window.delOne = async (id) => {
+        if(!confirm("Delete this question?")) return;
+        try {
+            await deleteDoc(doc(db, "nclex_questions", id));
+            globalQuestions = globalQuestions.filter(q => q.id !== id);
+            updateStats(globalQuestions);
+            window.filterData();
+            log(`Deleted ID: ${id}`, "success");
+        } catch(e) { log("Delete failed.", "error"); }
+    };
+
+    window.clearInput = () => {
+        document.getElementById('rawInput').value = "";
+        document.getElementById('previewArea').style.display = 'none';
+    };
+</script>
+</body>
+</html>
